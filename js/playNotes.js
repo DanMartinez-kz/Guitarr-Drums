@@ -2,16 +2,18 @@ let activeChordNotes = [];
 let activeAuxNotes = []; // arreglo para root/fifth
 let fadeTimeouts = [];
 let fadeTimeoutsAux = [];
+let clickCount = 0;
+let clickTimer = null;
 
 // Mapeo de acordes (ejemplo en C mayor)
 const chordMap = {
-  "I": [48, 52, 55, 60, 64, 67],
-  "II": [50, 53, 57, 62, 65, 69],
-  "III": [52, 55, 59, 64, 67, 71],
-  "IV": [53, 57, 60, 65, 69, 72],
-  "V": [55, 59, 62, 67, 71, 74],
-  "VI": [57, 60, 64, 69, 72, 76],
-  "VII": [59, 62, 65, 71, 74, 77]
+  "I": "",
+  "I7": "7",
+  "II": "m",
+  "III": "m",
+  "IV": "",
+  "V": "",
+  "VI": "m",
 };
 
 // Mapeo de batería (canal 10)
@@ -22,34 +24,72 @@ const drumMap = {
   "S": 38
 };
 
-// Funciones de rasgueo
-function strumDown(notes, velocity = 100) {
-  const baseDelay = 20;
-  const strumDelay = Math.max(4, baseDelay * (127 / velocity));
+// Función auxiliar para calcular velocity según posición
+function velocityByIndex(i, total) {
+  const maxVel = 127;
+  const minVel = 90;
+  // interpolación lineal: primera cuerda = maxVel, última = minVel
+  return Math.round(maxVel - (i * (maxVel - minVel) / (total - 1)));
+}
+
+
+let sustainTimeout = null;
+
+// Activar sustain
+function startSustain() {
+  if (!midiOutput) return;
+  // Cancelar sustain previo
+  if (sustainTimeout) {
+    clearTimeout(sustainTimeout);
+    sustainTimeout = null;
+  }
+  // CC64 ON (pedal presionado)
+  midiOutput.send([0xB0, 64, 127]);
+
+  // Apagar automáticamente después de 3 segundos
+  sustainTimeout = setTimeout(() => {
+    midiOutput.send([0xB0, 64, 0]);
+    sustainTimeout = null;
+  }, 3000);
+}
+
+// Apagar sustain inmediatamente (ej. al tocar otro acorde)
+function stopSustain() {
+  if (!midiOutput) return;
+  if (sustainTimeout) {
+    clearTimeout(sustainTimeout);
+    sustainTimeout = null;
+  }
+  midiOutput.send([0xB0, 64, 0]);
+}
+
+// Rasgueo hacia abajo con sustain
+function strumDown(notes) {
+  startSustain();
   notes.forEach((note, i) => {
+    const velocity = velocityByIndex(i, notes.length); // tu función de velocity
     setTimeout(() => {
-      midiOutput.send([0x90, note, velocity]); // Note ON canal 1 con velocity
-    }, i * strumDelay);
+      midiOutput.send([0x90, note, velocity]);
+    }, i * 10);
   });
 }
 
-function strumUp(notes, velocity = 100) {
-  const baseDelay = 20;
-  const strumDelay = Math.max(4, baseDelay * (127 / velocity));
+// Rasgueo hacia arriba con sustain
+function strumUp(notes) {
+  startSustain();
   [...notes].reverse().forEach((note, i) => {
+    const velocity = velocityByIndex(i, notes.length);
     setTimeout(() => {
-      midiOutput.send([0x90, note, velocity]); // Note ON canal 1 con velocity
-    }, i * strumDelay);
+      midiOutput.send([0x90, note, velocity]);
+    }, i * 10);
   });
 }
 
-// Root y Fifth
 function playRoot(notes) {
-  const root = notes[0] - 12;
+  const root = notes[0] - 24;
   midiOutput.send([0x98, root, 0x7f]); // canal 9
   activeAuxNotes.push(root);
 }
-
 function playFifth(notes) {
   const fifth = notes[2] - 24;
   midiOutput.send([0x98, fifth, 0x7f]); // canal 9
@@ -75,7 +115,7 @@ function stopActiveChord() {
 }
 
 // Fade out para acordes
-function fadeOutChord(notes, duration = 2000, steps = 12) {
+function fadeOutChord(notes, duration, steps) {
   if (!midiOutput) return;
   stopFade();
   const interval = duration / steps;
@@ -91,7 +131,7 @@ function fadeOutChord(notes, duration = 2000, steps = 12) {
     notes.forEach(note => midiOutput.send([0x80, note, 0x40]));
     activeChordNotes = [];
     midiOutput.send([0xB0, 11, 127]); // reset expresión
-  }, duration + 50));
+  }, duration + 250));
 }
 
 // Cancelar fade
@@ -133,10 +173,11 @@ function fadeOutAuxNotes(notes, duration = 2000, steps = 12) {
 
 // Eventos
 document.querySelectorAll('.subpad').forEach(subpad => {
+//  subpad.addEventListener('touchstart', e => {console.log(e)});
   subpad.addEventListener('pointerdown', e => {
     e.preventDefault();
     subpad.classList.add('active');
-console.log(e.pressure);
+    
     const velocity = Math.floor(e.pressure * 127) || 100; // valor MIDI 0–127
     
     const parentPad = subpad.closest('.pad');
@@ -144,14 +185,16 @@ console.log(e.pressure);
     const drum = parentPad.dataset.drum;
     const symbol = subpad.textContent.trim();
 
+    console.log(chordToMidi(chordLabel));
+
     // Solo flechas apagan acordes previos
     if (symbol === "↓" || symbol === "↑") stopActiveChord();
     
     // Solo B y b apagan notas previas
     if (symbol === "B" || symbol === "b") stopActiveAux();
 
-    if (chordLabel && chordMap[chordLabel] && midiOutput) {
-      const notes = chordMap[chordLabel];
+    if (chordLabel && chordToMidi(chordLabel) && midiOutput) {
+      const notes = chordToMidi(chordLabel);
       if (symbol === "↓") { activeChordNotes = notes; strumDown(notes); }
       if (symbol === "↑") { activeChordNotes = notes; strumUp(notes); }
       if (symbol === "B") playRoot(notes);
@@ -162,7 +205,24 @@ console.log(e.pressure);
       const note = drumMap[symbol];
       if (note) midiOutput.send([0x99, note, 0x7f]); // canal 10
     }
-  });
+    
+//para fullscreen
+if (symbol === "b")  {
+  clickCount++;
+
+  if (clickTimer) clearTimeout(clickTimer);
+  clickTimer = setTimeout(() => { clickCount = 0; }, 200); // ventana de 600ms
+
+  if (clickCount === 2) {
+    clickCount = 0;
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  }
+}
+});
 
   subpad.addEventListener('pointerup', e => {
     subpad.classList.remove('active');
@@ -173,7 +233,7 @@ console.log(e.pressure);
 
     // Flechas: fade out
     if ((symbol === "↓" || symbol === "↑") && activeChordNotes.length > 0) {
-      fadeOutChord(activeChordNotes, 2000, 12);
+      fadeOutChord(activeChordNotes, 6000, 100);
     }
 
     // Root/Fifth: fade out
@@ -193,9 +253,8 @@ console.log(e.pressure);
   });
   
   subpad.addEventListener('contextmenu', e => e.preventDefault());
-subpad.style.userSelect = "none";
+  subpad.style.userSelect = "none";
   
   subpad.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
-      subpad.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
-
+  subpad.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
 });

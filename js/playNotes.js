@@ -215,10 +215,24 @@ if (symbol === "b")  {
 
   if (clickCount === 2) {
     clickCount = 0;
+    switch (subpad.id) {
+      case "pad1-b":
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen();
     } else {
       document.exitFullscreen();
+    }
+      break;
+      case "pad2-b":
+  const select = document.getElementById("midiSelect");
+  if (select.showPicker) {
+    // Navegadores modernos (Chrome, Edge, algunos móviles)
+    select.showPicker(); 
+  } else {
+    // Fallback: darle foco
+    select.focus();
+  }
+  break;
     }
   }
 }

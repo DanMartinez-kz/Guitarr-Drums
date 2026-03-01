@@ -64,3 +64,13 @@ body {
   font-size: 90px;   /* flechas más grandes */
   color: white;   /* opcional: color distinto */
 }
+#midiSelect {
+      color: white;
+      background-color: black;
+      border: 2px solid black;
+      outline: none;
+  position: fixed;   /* se queda fijo en la ventana */
+  top: 0px;       /* lo mandas fuera del área visible */
+  left: 50%;      /* fuera del área de trabajo */
+  display: block;    /* siempre está en el DOM */
+}

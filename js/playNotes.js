@@ -185,7 +185,7 @@ document.querySelectorAll('.subpad').forEach(subpad => {
     const drum = parentPad.dataset.drum;
     const symbol = subpad.textContent.trim();
 
-    console.log(chordToMidi(chordLabel));
+   // console.log(chordToMidi(chordLabel));
 
     // Solo flechas apagan acordes previos
     if (symbol === "↓" || symbol === "↑") stopActiveChord();

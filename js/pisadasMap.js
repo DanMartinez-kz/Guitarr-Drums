@@ -54,6 +54,7 @@ const pisadasMap = {
 };
 
 function chordToMidi(chordName) {
+if (chordName !== "Drum") { 
   const shape = pisadasMap[chordName]; // ej. "C" → ["X",3,2,0,1,0]
   const notes = [];
 
@@ -65,4 +66,5 @@ function chordToMidi(chordName) {
   });
 
   return notes;
+}
 }

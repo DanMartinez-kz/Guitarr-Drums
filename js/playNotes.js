@@ -23,19 +23,23 @@ const drumMap = {
 };
 
 // Funciones de rasgueo
-function strumDown(notes) {
+function strumDown(notes, velocity = 100) {
+  const baseDelay = 20;
+  const strumDelay = Math.max(4, baseDelay * (127 / velocity));
   notes.forEach((note, i) => {
     setTimeout(() => {
-      midiOutput.send([0x90, note, 0x7f]); // canal 1
-    }, i * 16);
+      midiOutput.send([0x90, note, velocity]); // Note ON canal 1 con velocity
+    }, i * strumDelay);
   });
 }
 
-function strumUp(notes) {
+function strumUp(notes, velocity = 100) {
+  const baseDelay = 20;
+  const strumDelay = Math.max(4, baseDelay * (127 / velocity));
   [...notes].reverse().forEach((note, i) => {
     setTimeout(() => {
-      midiOutput.send([0x90, note, 0x7f]); // canal 1
-    }, i * 16);
+      midiOutput.send([0x90, note, velocity]); // Note ON canal 1 con velocity
+    }, i * strumDelay);
   });
 }
 
@@ -132,7 +136,9 @@ document.querySelectorAll('.subpad').forEach(subpad => {
   subpad.addEventListener('pointerdown', e => {
     e.preventDefault();
     subpad.classList.add('active');
-
+console.log(e.pressure);
+    const velocity = Math.floor(e.pressure * 127) || 100; // valor MIDI 0–127
+    
     const parentPad = subpad.closest('.pad');
     const chordLabel = parentPad.querySelector('.pad-label')?.textContent.trim();
     const drum = parentPad.dataset.drum;
@@ -185,4 +191,11 @@ document.querySelectorAll('.subpad').forEach(subpad => {
   subpad.addEventListener('pointercancel', () => {
     subpad.classList.remove('active');
   });
+  
+  subpad.addEventListener('contextmenu', e => e.preventDefault());
+subpad.style.userSelect = "none";
+  
+  subpad.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
+      subpad.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+
 });

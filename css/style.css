@@ -55,6 +55,7 @@ body {
   user-select: none;   /* 👈 evita seleccionar el texto */
   -webkit-user-select: none; /* soporte Safari/Chrome móviles */
   -ms-user-select: none;     /* soporte IE/Edge antiguos */
+  -webkit-touch-callout: none; /* evita menú contextual en iOS/Android */
 }
     .subpad:active {
       background: #ff5722;

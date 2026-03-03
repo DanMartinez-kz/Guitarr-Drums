@@ -27,7 +27,7 @@ const drumMap = {
 // Función auxiliar para calcular velocity según posición
 function velocityByIndex(i, total) {
   const maxVel = 120;
-  const minVel = 70;
+  const minVel = 90;
   // interpolación lineal: primera cuerda = maxVel, última = minVel
   return Math.round(maxVel - (i * (maxVel - minVel) / (total - 1)));
 }
@@ -41,6 +41,7 @@ function startSustain() {
   // Cancelar sustain previo
   if (sustainTimeout) {
     clearTimeout(sustainTimeout);
+    midiOutput.send([0xB0, 64, 0]);
     sustainTimeout = null;
   }
   // CC64 ON (pedal presionado)
@@ -50,7 +51,7 @@ function startSustain() {
   sustainTimeout = setTimeout(() => {
     midiOutput.send([0xB0, 64, 0]);
     sustainTimeout = null;
-  }, 3000);
+  }, 2600);
 }
 
 // Apagar sustain inmediatamente (ej. al tocar otro acorde)
@@ -65,18 +66,20 @@ function stopSustain() {
 
 // Rasgueo hacia abajo con sustain
 function strumDown(notes) {
-  startSustain();
-  notes.forEach((note, i) => {
+  stopSustain();
+    midiOutput.send([0xB0, 64, 127]);
+    notes.forEach((note, i) => {
     const velocity = velocityByIndex(i, notes.length); // tu función de velocity
     setTimeout(() => {
       midiOutput.send([0x90, note, velocity]);
-    }, i * 12);
+    }, i * 10);
   });
 }
 
 // Rasgueo hacia arriba con sustain
 function strumUp(notes) {
-  startSustain();
+  stopSustain();
+  midiOutput.send([0xB0, 64, 127]);
   [...notes].reverse().forEach((note, i) => {
     const velocity = velocityByIndex(i, notes.length);
     setTimeout(() => {
@@ -86,12 +89,12 @@ function strumUp(notes) {
 }
 
 function playRoot(notes) {
-  const root = notes[0] - 24;
+  const root = notes[0];
   midiOutput.send([0x98, root, 0x7f]); // canal 9
   activeAuxNotes.push(root);
 }
 function playFifth(notes) {
-  const fifth = notes[2] - 24;
+  const fifth = notes[0] - 5;
   midiOutput.send([0x98, fifth, 0x7f]); // canal 9
   activeAuxNotes.push(fifth);
 }
@@ -117,21 +120,24 @@ function stopActiveChord() {
 // Fade out para acordes
 function fadeOutChord(notes, duration, steps) {
   if (!midiOutput) return;
-  stopFade();
-  const interval = duration / steps;
+  startSustain();
+ // stopFade();
 
+  // Apagar notas inmediatamente
+  stopActiveChord()
+  
+  // Aplicar fade solo al canal, no a las notas activas
+  const interval = duration / steps;
   for (let i = 0; i <= steps; i++) {
     fadeTimeouts.push(setTimeout(() => {
       const value = Math.max(0, 127 - i * (127 / steps));
-      midiOutput.send([0xB0, 11, value]); // canal 1
+      midiOutput.send([0xB0, 11, value]); // expresión canal 1
     }, i * interval));
   }
 
-  fadeTimeouts.push(setTimeout(() => {
-    notes.forEach(note => midiOutput.send([0x80, note, 0x40]));
-    activeChordNotes = [];
-    midiOutput.send([0xB0, 11, 127]); // reset expresión
-  }, duration + 2500));
+  //fadeTimeouts.push(setTimeout(() => {
+  //  midiOutput.send([0xB0, 11, 127]); // reset expresión
+ // }, duration + 5000));
 }
 
 // Cancelar fade
@@ -167,8 +173,8 @@ function fadeOutAuxNotes(notes, duration = 2000, steps = 12) {
   fadeTimeoutsAux.push(setTimeout(() => {
     notes.forEach(note => midiOutput.send([0x88, note, 0x40])); // canal 9
     activeAuxNotes = [];
-    midiOutput.send([0xB8, 11, 127]); // reset expresión canal 9
-  }, duration + 50));
+   // midiOutput.send([0xB8, 11, 127]); // reset expresión canal 9
+  }, duration + 1100));
 }
 
 // Eventos
@@ -178,7 +184,7 @@ document.querySelectorAll('.subpad').forEach(subpad => {
     e.preventDefault();
     subpad.classList.add('active');
     
-    const velocity = Math.floor(e.pressure * 127) || 100; // valor MIDI 0–127
+    //const velocity = Math.floor(e.pressure * 127) || 100; // valor MIDI 0–127
     
     const parentPad = subpad.closest('.pad');
     const chordLabel = parentPad.querySelector('.pad-label')?.textContent.trim();
@@ -247,12 +253,12 @@ if (symbol === "b")  {
 
     // Flechas: fade out
     if ((symbol === "↓" || symbol === "↑") && activeChordNotes.length > 0) {
-      fadeOutChord(activeChordNotes, 6000, 100);
+      fadeOutChord(activeChordNotes, 2500, 127);
     }
 
     // Root/Fifth: fade out
     if ((symbol === "B" || symbol === "b") && activeAuxNotes.length > 0) {
-      fadeOutAuxNotes(activeAuxNotes, 2000, 12);
+      fadeOutAuxNotes(activeAuxNotes, 1000, 127);
     }
 
     // Batería: apagado inmediato

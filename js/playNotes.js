@@ -4,8 +4,6 @@ let fadeTimeouts = [];
 let fadeTimeoutsAux = [];
 let clickCount = 0;
 let clickTimer = null;
-let rasgueoTime = null;
-let duration = null;
 
 // Mapeo de acordes (ejemplo en C mayor)
 const chordMap = {
@@ -28,8 +26,8 @@ const drumMap = {
 
 // Función auxiliar para calcular velocity según posición
 function velocityByIndex(i, total) {
-  const maxVel = 105;
-  const minVel = 60;
+  const maxVel = 120;
+  const minVel = 70;
   // interpolación lineal: primera cuerda = maxVel, última = minVel
   return Math.round(maxVel - (i * (maxVel - minVel) / (total - 1)));
 }
@@ -66,25 +64,24 @@ function stopSustain() {
 }
 
 // Rasgueo hacia abajo con sustain
-function strumDown(notes, duration) {
-  console.log("duracion:", duration);
+function strumDown(notes) {
   startSustain();
-  notes.slice(1).forEach((note, i) => {
+  notes.forEach((note, i) => {
     const velocity = velocityByIndex(i, notes.length); // tu función de velocity
     setTimeout(() => {
       midiOutput.send([0x90, note, velocity]);
-    }, i * duration);
+    }, i * 12);
   });
 }
 
 // Rasgueo hacia arriba con sustain
-function strumUp(notes, duration) {
+function strumUp(notes) {
   startSustain();
-  [...notes].reverse().slice(1).forEach((note, i) => {
+  [...notes].reverse().forEach((note, i) => {
     const velocity = velocityByIndex(i, notes.length);
     setTimeout(() => {
       midiOutput.send([0x90, note, velocity]);
-    }, i * duration);
+    }, i * 12);
   });
 }
 
@@ -120,7 +117,7 @@ function stopActiveChord() {
 // Fade out para acordes
 function fadeOutChord(notes, duration, steps) {
   if (!midiOutput) return;
-  //stopFade();
+  stopFade();
   const interval = duration / steps;
 
   for (let i = 0; i <= steps; i++) {
@@ -134,7 +131,7 @@ function fadeOutChord(notes, duration, steps) {
     notes.forEach(note => midiOutput.send([0x80, note, 0x40]));
     activeChordNotes = [];
     midiOutput.send([0xB0, 11, 127]); // reset expresión
-  }, duration + 4000));
+  }, duration + 2500));
 }
 
 // Cancelar fade
@@ -173,49 +170,33 @@ function fadeOutAuxNotes(notes, duration = 2000, steps = 12) {
     midiOutput.send([0xB8, 11, 127]); // reset expresión canal 9
   }, duration + 50));
 }
-let triggered = false;
-let chordLabel = null;
-let notes = [];
+
 // Eventos
 document.querySelectorAll('.subpad').forEach(subpad => {
 //  subpad.addEventListener('touchstart', e => {console.log(e)});
   subpad.addEventListener('pointerdown', e => {
     e.preventDefault();
     subpad.classList.add('active');
-    let pressStart = Date.now()
+    
+    const velocity = Math.floor(e.pressure * 127) || 100; // valor MIDI 0–127
     
     const parentPad = subpad.closest('.pad');
-    chordLabel = parentPad.querySelector('.pad-label')?.textContent.trim();
+    const chordLabel = parentPad.querySelector('.pad-label')?.textContent.trim();
     const drum = parentPad.dataset.drum;
     const symbol = subpad.textContent.trim();
 
-    
-    // Solo flechas apagan acordes previos e inician temporizador
-    if (symbol === "↓" || symbol === "↑") {
-      notes = chordToMidi(chordLabel);
-      stopActiveChord();
-      if (symbol === "↓") {midiOutput.send([0x90, notes[0], 120])};
-      if (symbol === "↑") {midiOutput.send([0x90, [...notes].reverse()[0], 120])};
-      intervalId = setInterval(() => {
-        duration = Date.now() - pressStart;
-        //console.log("Duración: " + duration + " ms");
-        // activar rasgueo cuando llegue a Xms (o más)
-        if (!triggered && duration >= 180) {
-          if (symbol === "↓") { activeChordNotes = notes; strumDown(notes, duration); }
-          if (symbol === "↑") { activeChordNotes = notes; strumUp(notes, duration); }
-          triggered = true; // evitar múltiples disparos
-          console.log(triggered);
-        }
-      }, 10); // refresca cada 10ms
-    }
+   // console.log(chordToMidi(chordLabel));
+
+    // Solo flechas apagan acordes previos
+    if (symbol === "↓" || symbol === "↑") stopActiveChord();
     
     // Solo B y b apagan notas previas
     if (symbol === "B" || symbol === "b") stopActiveAux();
 
     if (chordLabel && chordToMidi(chordLabel) && midiOutput) {
-      notes = chordToMidi(chordLabel);
-      //if (symbol === "↓") { activeChordNotes = notes; strumDown(notes, duration); }
-     // if (symbol === "↑") { activeChordNotes = notes; strumUp(notes, duration); }
+      const notes = chordToMidi(chordLabel);
+      if (symbol === "↓") { activeChordNotes = notes; strumDown(notes); }
+      if (symbol === "↑") { activeChordNotes = notes; strumUp(notes); }
       if (symbol === "B") playRoot(notes);
       if (symbol === "b") playFifth(notes);
     }
@@ -259,25 +240,14 @@ if (symbol === "b")  {
 
   subpad.addEventListener('pointerup', e => {
     subpad.classList.remove('active');
-    triggered = false;
-    
+
     const symbol = subpad.textContent.trim();
     const parentPad = subpad.closest('.pad');
     const drum = parentPad.dataset.drum;
 
-    // Flechas: fade out y reiniciar contador
-    if ((symbol === "↓" || symbol === "↑")) {
-      stopActiveChord();
-      let dur = 40;
-      clearInterval(intervalId);
-      switch (true) {
-        case (duration <= 80) : dur = 10;
-        break;
-      }
-      console.log(duration);
-      if (duration <= 180 && symbol === "↓") {activeChordNotes = notes; strumDown(notes, dur)};
-      if (duration <= 180 && symbol === "↑") {activeChordNotes = notes; strumUp(notes, dur)};
-      if (activeChordNotes.length > 0){ fadeOutChord(activeChordNotes, 10000, 10)} 
+    // Flechas: fade out
+    if ((symbol === "↓" || symbol === "↑") && activeChordNotes.length > 0) {
+      fadeOutChord(activeChordNotes, 6000, 100);
     }
 
     // Root/Fifth: fade out

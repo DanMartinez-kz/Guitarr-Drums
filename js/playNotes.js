@@ -2,8 +2,7 @@ let activeChordNotes = [];
 let activeAuxNotes = []; // arreglo para root/fifth
 let fadeTimeouts = [];
 let fadeTimeoutsAux = [];
-let clickCount = 0;
-let clickTimer = null;
+let apagadoTimer = null;
 
 // Mapeo de acordes (ejemplo en C mayor)
 const chordMap = {
@@ -26,8 +25,8 @@ const drumMap = {
 
 // Función auxiliar para calcular velocity según posición
 function velocityByIndex(i, total) {
-  const maxVel = 120;
-  const minVel = 90;
+  const maxVel = 90;
+  const minVel = 65;
   // interpolación lineal: primera cuerda = maxVel, última = minVel
   return Math.round(maxVel - (i * (maxVel - minVel) / (total - 1)));
 }
@@ -84,7 +83,7 @@ function strumUp(notes) {
     const velocity = velocityByIndex(i, notes.length);
     setTimeout(() => {
       midiOutput.send([0x90, note, velocity]);
-    }, i * 12);
+    }, i * 8);
   });
 }
 
@@ -177,12 +176,17 @@ function fadeOutAuxNotes(notes, duration = 2000, steps = 12) {
   }, duration + 1100));
 }
 
+let pressStart = null;
+let intervalId = null;
+let pressTime = null;
 // Eventos
 document.querySelectorAll('.subpad').forEach(subpad => {
 //  subpad.addEventListener('touchstart', e => {console.log(e)});
   subpad.addEventListener('pointerdown', e => {
     e.preventDefault();
+    clearTimeout(apagadoTimer);
     subpad.classList.add('active');
+    pressStart = performance.now();
     
     //const velocity = Math.floor(e.pressure * 127) || 100; // valor MIDI 0–127
     
@@ -212,49 +216,39 @@ document.querySelectorAll('.subpad').forEach(subpad => {
       if (note) midiOutput.send([0x99, note, 0x7f]); // canal 10
     }
     
-//para fullscreen
-if (symbol === "b")  {
-  clickCount++;
-
-  if (clickTimer) clearTimeout(clickTimer);
-  clickTimer = setTimeout(() => { clickCount = 0; }, 200); // ventana de 600ms
-
-  if (clickCount === 2) {
-    clickCount = 0;
-    switch (subpad.id) {
-      case "pad1-b":
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
-    } else {
-      document.exitFullscreen();
-    }
-      break;
-      case "pad2-b":
-  const select = document.getElementById("midiSelect");
-  if (select.showPicker) {
-    // Navegadores modernos (Chrome, Edge, algunos móviles)
-    select.showPicker(); 
-  } else {
-    // Fallback: darle foco
-    select.focus();
-  }
-  break;
-    }
-  }
-}
+    // Actualizamos el contador en tiempo real
+    intervalId = setInterval(() => {
+    }, 10); // refresco cada 50ms
+  
 });
 
   subpad.addEventListener('pointerup', e => {
     subpad.classList.remove('active');
 
+    clearInterval(intervalId);
+    intervalId = null;
+
+    pressTime = performance.now() - pressStart;
+    console.log(pressTime);
+    pressStart = null;
+    
     const symbol = subpad.textContent.trim();
     const parentPad = subpad.closest('.pad');
     const drum = parentPad.dataset.drum;
 
     // Flechas: fade out
     if ((symbol === "↓" || symbol === "↑") && activeChordNotes.length > 0) {
-      fadeOutChord(activeChordNotes, 2500, 127);
+    if (pressTime > 0) {
+          fadeOutChord(activeChordNotes, 2500, 127);
+    } else {
+      console.log("jdj");
+      apagadoTimer = setTimeout(() => {
+     // stopActiveChord();
+      midiOutput.send([0xB0, 11, 0]);
+      midiOutput.send([0x90, 36, 127]);
+      }, 50);
     }
+    };
 
     // Root/Fifth: fade out
     if ((symbol === "B" || symbol === "b") && activeAuxNotes.length > 0) {

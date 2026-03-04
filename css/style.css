@@ -74,3 +74,24 @@ body {
   left: 50%;      /* fuera del área de trabajo */
   display: block;    /* siempre está en el DOM */
 }
+    #volumenes {
+          position: fixed;
+          top: 0;
+          left: 0;
+          z-index: 1000;
+      display: none; /* oculto por defecto */
+      margin-top: 20px;
+      padding: 10px;
+      background: black;
+          color: white;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+          width: 100%;
+          max-width: 95vw;
+    }
+    .slider-container {
+      margin: 10px 0;
+    }
+.vol{
+      width:100%;
+}

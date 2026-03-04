@@ -7,6 +7,18 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <div id="volumenes">
+    <div class="slider-container">
+      <label>Guitarr: <input type="range" class="vol" data-ch="1" min="0" max="127" value="100"></label>
+    </div>
+    <div class="slider-container">
+      <label>Bass: <input type="range" class="vol" data-ch="9" min="0" max="127" value="127"></label>
+    </div>
+    <div class="slider-container">
+      <label>Drums: <input type="range" class="vol" data-ch="10" min="0" max="127" value="100"></label>
+    </div>
+  </div>
+
   <!-- Pads con nombres de acordes -->
   <div class="pad midi" data-midi="60">
     <div class="pad-label">C</div>
@@ -87,5 +99,6 @@
   <script src="js/midi.js"></script>
   <script src="js/pisadasMap.js"></script>
   <script src="js/playNotes.js"></script>
+  <script src="js/ajustes.js"></script>
 </body>
 </html>

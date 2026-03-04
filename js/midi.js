@@ -35,3 +35,11 @@ function onMIDIFailure() {
   console.error("No se pudo acceder a MIDI");
 }
 
+//Volumenes
+const vol = document.querySelectorAll(".vol");
+
+vol.forEach((vol, index)=>{
+  vol.addEventListener("input", (event) =>{
+        midiOutput.send([(0xB0+(vol.dataset.ch-1)), 7, vol.value])
+  })
+  })

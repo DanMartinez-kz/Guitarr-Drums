@@ -179,6 +179,8 @@ function fadeOutAuxNotes(notes, duration = 2000, steps = 12) {
 let pressStart = null;
 let intervalId = null;
 let pressTime = null;
+let chordAnt = null;
+let chordAct =null;
 // Eventos
 document.querySelectorAll('.subpad').forEach(subpad => {
 //  subpad.addEventListener('touchstart', e => {console.log(e)});
@@ -194,13 +196,18 @@ document.querySelectorAll('.subpad').forEach(subpad => {
     const chordLabel = parentPad.querySelector('.pad-label')?.textContent.trim();
     const drum = parentPad.dataset.drum;
     const symbol = subpad.textContent.trim();
-
-   // console.log(chordToMidi(chordLabel));
-
+    console.log(symbol);
     // Solo flechas apagan acordes previos
-    if (symbol === "↓" || symbol === "↑") stopActiveChord();
-    
-    // Solo B y b apagan notas previas
+    if (symbol === "↓" || symbol === "↑") {
+      stopActiveChord();
+      chordAct = chordLabel;
+      console.log("Act:", chordAct, "Ant:", chordAnt);
+      if (chordAct!=chordAnt){
+        midiOutput.send([0x90, 36, 100]);
+        chordAnt=chordAct;
+      };
+    };
+        // Solo B y b apagan notas previas
     if (symbol === "B" || symbol === "b") stopActiveAux();
 
     if (chordLabel && chordToMidi(chordLabel) && midiOutput) {
@@ -234,6 +241,7 @@ document.querySelectorAll('.subpad').forEach(subpad => {
     
     const symbol = subpad.textContent.trim();
     const parentPad = subpad.closest('.pad');
+    const chordLabel = parentPad.querySelector('.pad-label')?.textContent.trim();
     const drum = parentPad.dataset.drum;
 
     // Flechas: fade out
@@ -245,7 +253,7 @@ document.querySelectorAll('.subpad').forEach(subpad => {
       apagadoTimer = setTimeout(() => {
      // stopActiveChord();
       midiOutput.send([0xB0, 11, 0]);
-      midiOutput.send([0x90, 36, 127]);
+      //midiOutput.send([0x90, 36, 127]);
       }, 50);
     }
     };
@@ -254,6 +262,8 @@ document.querySelectorAll('.subpad').forEach(subpad => {
     if ((symbol === "B" || symbol === "b") && activeAuxNotes.length > 0) {
       fadeOutAuxNotes(activeAuxNotes, 1000, 127);
     }
+    
+   // chordAnt = chordLabel;
 
     // Batería: apagado inmediato
     if (drum && midiOutput) {
@@ -271,4 +281,19 @@ document.querySelectorAll('.subpad').forEach(subpad => {
   
   subpad.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
   subpad.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+});
+
+const audio = document.getElementById("palmMute");
+  // Añadimos el evento pointerdown a los semicírculos
+  const corners = document.querySelectorAll(".corner");
+corners.forEach(corner =>{    
+  corner.addEventListener('contextmenu', e => e.preventDefault());
+corner.addEventListener("pointerdown", (event) => {
+      console.log("Semicírculo clicado:", corner.className);
+      stopActiveChord();
+      midiOutput.send([0xB0, 11, 0]);
+     // midiOutput.send([0x91, 39, 80]);
+     // audio.currentTime = 0;
+      //audio.play(); // reproducir con Web Audio API
+    });
 });

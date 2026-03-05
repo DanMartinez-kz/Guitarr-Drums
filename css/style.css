@@ -95,3 +95,33 @@ body {
 .vol{
       width:100%;
 }
+.corner {
+  position: absolute;
+  width: 90px;
+  height: 40px;
+  background: black;
+  cursor: pointer;
+  z-index: 1000;
+      border: 1px solid white;
+
+  /* Evita selección de texto y highlight */
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  -webkit-touch-callout: none;
+
+  /* Evita el highlight azul/gris en móviles */
+  -webkit-tap-highlight-color: transparent;
+
+  /* Opcional: quita el outline al enfocarse */
+  outline: none;
+}
+.corner.top-right {
+  top: 0;
+  right: 50%;
+   transform: translateX(50%);   
+  border-radius: 0 0 40px 40px;
+}
+.corner:active{
+      background: #ff5722;
+}

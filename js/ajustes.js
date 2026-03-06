@@ -1,13 +1,13 @@
 let clickCount = 0;
 let clickTimer = null;
 
-document.querySelectorAll('.subpad').forEach(subpad => {
+document.querySelectorAll('.corner').forEach(subpad => {
   subpad.addEventListener('pointerdown', e => {
     
-    const symbol = subpad.textContent.trim();
-    
+    //const symbol = subpad.textContent.trim();
+ console.log(subpad.id);   
     //Casos-Ajustes
-if (symbol === "b")  {
+//if (symbol === "b")  {
   clickCount++;
 
   if (clickTimer) clearTimeout(clickTimer);
@@ -16,14 +16,14 @@ if (symbol === "b")  {
   if (clickCount === 2) {
     clickCount = 0;
     switch (subpad.id) {
-      case "pad1-b":
+      case "crn1":
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen();
     } else {
       document.exitFullscreen();
     }
       break;
-      case "pad2-b":
+      case "crn2":
   const select = document.getElementById("midiSelect");
   if (select.showPicker) {
     // Navegadores modernos (Chrome, Edge, algunos móviles)
@@ -33,7 +33,7 @@ if (symbol === "b")  {
     select.focus();
   }
   break;
-      case "pad3-b":
+      case "crn7":
       const slidersDiv = document.getElementById("volumenes");
 
           if (slidersDiv.style.display === "none") {
@@ -43,7 +43,7 @@ if (symbol === "b")  {
       }
 
     }
-  }
+ // }
 }
 
   });

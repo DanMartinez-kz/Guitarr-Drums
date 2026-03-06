@@ -25,8 +25,8 @@ const drumMap = {
 
 // Función auxiliar para calcular velocity según posición
 function velocityByIndex(i, total) {
-  const maxVel = 90;
-  const minVel = 65;
+  const maxVel = 110;
+  const minVel = 80;
   // interpolación lineal: primera cuerda = maxVel, última = minVel
   return Math.round(maxVel - (i * (maxVel - minVel) / (total - 1)));
 }
@@ -88,12 +88,12 @@ function strumUp(notes) {
 }
 
 function playRoot(notes) {
-  const root = notes[0];
+  const root = notes[0]-12;
   midiOutput.send([0x98, root, 0x7f]); // canal 9
   activeAuxNotes.push(root);
 }
 function playFifth(notes) {
-  const fifth = notes[0] - 5;
+  const fifth = notes[0] - 17;
   midiOutput.send([0x98, fifth, 0x7f]); // canal 9
   activeAuxNotes.push(fifth);
 }
@@ -202,8 +202,13 @@ document.querySelectorAll('.subpad').forEach(subpad => {
       stopActiveChord();
       chordAct = chordLabel;
       console.log("Act:", chordAct, "Ant:", chordAnt);
+      const notes = chordToMidi(chordLabel);
       if (chordAct!=chordAnt){
-        midiOutput.send([0x90, 36, 100]);
+        midiOutput.send([0x90, 36, 80]);
+        midiOutput.send([0xB8, 11, 127]);
+        playRoot(notes);
+        console.log(notes);
+    //    midiOutput.send([0x98, 60, 127]);
         chordAnt=chordAct;
       };
     };
@@ -289,6 +294,7 @@ const audio = document.getElementById("palmMute");
 corners.forEach(corner =>{    
   corner.addEventListener('contextmenu', e => e.preventDefault());
 corner.addEventListener("pointerdown", (event) => {
+  corner.classList.add('active');
       console.log("Semicírculo clicado:", corner.className);
       stopActiveChord();
       midiOutput.send([0xB0, 11, 0]);
@@ -296,4 +302,7 @@ corner.addEventListener("pointerdown", (event) => {
      // audio.currentTime = 0;
       //audio.play(); // reproducir con Web Audio API
     });
+  corner.addEventListener("pointerup", e => {
+    corner.classList.remove('active');
+  })
 });

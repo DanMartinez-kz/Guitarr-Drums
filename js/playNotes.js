@@ -181,6 +181,12 @@ function fadeOutAuxNotes(notes, duration = 2000, steps = 12) {
   }, duration + 1100));
 }
 
+function playDrums(symbol){
+  console.log(symbol);
+        const note = drumMap[symbol];
+      if (note) midiOutput.send([0x99, note, 0x7f]); // canal 10
+}
+
 let pressStart = null;
 let intervalId = null;
 let pressTime = null;
@@ -200,6 +206,7 @@ document.querySelectorAll('.subpad').forEach(subpad => {
     const parentPad = subpad.closest('.pad');
     const chordLabel = parentPad.querySelector('.pad-label')?.textContent.trim();
     const symbol = subpad.textContent.trim();
+    const drum = parentPad.dataset.drum;
     
         // Solo flechas apagan acordes previos
     if (symbol === "↓" || symbol === "↑") {
@@ -231,7 +238,7 @@ document.querySelectorAll('.subpad').forEach(subpad => {
     // Actualizamos el contador en tiempo real
     intervalId = setInterval(() => {
     }, 10); // refresco cada 50ms
-  
+    
 });
 
   subpad.addEventListener('pointerup', e => {
@@ -271,6 +278,8 @@ document.querySelectorAll('.subpad').forEach(subpad => {
  
   });
 
+
+  
   subpad.addEventListener('pointercancel', () => {
     subpad.classList.remove('active');
   });
@@ -292,8 +301,7 @@ corners.forEach(corner =>{
   corner.classList.add('active');
     
     const symbol = corner.textContent.trim();const parentPad = corner.closest('.pad');
-    const drum = parentPad.dataset.drum;
-        
+            
     if (drum && midiOutput) {
       const note = drumMap[symbol];
       if (note) midiOutput.send([0x99, note, 0x7f]); // canal 10
@@ -320,4 +328,28 @@ corners.forEach(corner =>{
   });
 });
 
-    
+// Al mover el dedo por la pantalla
+let actE = null;
+document.addEventListener("pointermove", e => {
+  if (e.buttons > 0) { // dedo/mouse presionado
+    const elem = document.elementFromPoint(e.clientX, e.clientY);
+    if (elem && elem.classList.contains("D")) {
+    //  activarPad(elem);
+      if (elem!=actE){
+        playDrums(elem.textContent);
+        //console.log(elem.textContent);
+        if(actE!=null) {actE.classList.remove('active')};
+        elem.classList.add('active');
+      }
+      actE = elem;
+    };
+  }
+});
+
+document.addEventListener('pointerup', e => {
+  const elem = document.elementFromPoint(e.clientX, e.clientY);
+  if (elem && elem.classList.contains("D")) {
+    elem.classList.remove('active');
+    actE = null;
+  }
+})

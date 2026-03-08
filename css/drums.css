@@ -1,0 +1,115 @@
+/* Kick lateral izquierda */
+.corner.D.kick {
+  width: 100px;
+  height: 100px;
+  right: 0;
+  bottom: 0;
+  /*transform: translateY(-50%);*/
+  border-radius: 100px 0px 0px 0px;
+  background: red;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* HiHat lateral derecha */
+.D.hiHat {
+  width: 100px;
+  height: 100px;
+  left: 0;
+  bottom: 0;
+  /*transform: translateY(-50%);*/
+  border-radius: 0px 100px 0px 0px;
+  background: black;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Snare arriba centrado */
+.snare {
+  top: 0;
+  left: 0;
+  /*transform: translateX(-50%);*/
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: black;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Tom alto (arriba derecha) */
+.D.hTom {
+  width: 100px;
+  height: 60px;
+  top: 0;
+  right: 20%;
+  border-radius: 0 0 60px 60px;
+  background: black;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Tom medio (arriba izquierda) */
+.mTom {
+  width: 100px;
+  height: 60px;
+  top: 0;
+  left: 20%;
+  border-radius: 0 0 60px 60px;
+  background: black;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Tom bajo lateral izquierda abajo */
+.D.lTom {
+  width: 160px;
+  height: 80px;
+  left: 0;
+  bottom: 20%;
+  border-radius: 0 80px 80px 0;
+  background: black;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Splash lateral derecha arriba */
+.D.pSplash {
+  width: 70px;
+  height: 70px;
+  right: 0;
+  top: 20%;
+  border-radius: 70px 0 0 0;
+  background: black;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Crash lateral derecha abajo */
+.D.pCrash {
+  width: 70px;
+  height: 70px;
+  right: 0;
+  bottom: 20%;
+  border-radius: 0 0 0 70px;
+  background: black;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+

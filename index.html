@@ -9,7 +9,7 @@
 <body>
   <audio id="palmMute" src="palmMute.wav" preload="auto"></audio>
   
-    <div id="volumenes">
+    <div class="opciones" id="volumenes">
     <div class="slider-container">
       <label>Guitarr: <input type="range" class="vol" data-ch="1" min="0" max="127" value="100"></label>
     </div>
@@ -23,7 +23,7 @@
 
   <!-- Pads con nombres de acordes -->
   <div class="pad midi" data-midi="60">
-    <div class="pad-label">C</div>
+    <div class="pad-label">E</div>
     <div class="subpads">
       <div class="corner top-right" id="crn1"></div>
       <div class="subpad arrow">↓</div>
@@ -33,7 +33,7 @@
     </div>
   </div>
   <div class="pad midi" data-midi="62">
-    <div class="pad-label">C7</div>
+    <div class="pad-label">B</div>
     <div class="subpads">
       <div class="corner top-right" id="crn2"></div>
       <div class="subpad arrow">↓</div>
@@ -43,7 +43,7 @@
     </div>
   </div>
   <div class="pad midi" data-midi="64">
-    <div class="pad-label">Dm</div>
+    <div class="pad-label">A</div>
     <div class="subpads">
       <div class="corner top-right" id="crn3"></div>
       <div class="subpad arrow">↓</div>
@@ -53,7 +53,7 @@
     </div>
   </div>
   <div class="pad midi" data-midi="65">
-    <div class="pad-label">Em</div>
+    <div class="pad-label">F#m</div>
     <div class="subpads">
       <div class="corner top-right" id="crn4"></div>
       <div class="subpad arrow">↓</div>
@@ -63,7 +63,7 @@
     </div>
   </div>
   <div class="pad midi" data-midi="67">
-    <div class="pad-label">F</div>
+    <div class="pad-label">G#m</div>
     <div class="subpads">
       <div class="corner top-right" id="crn5"></div>
       <div class="subpad arrow">↓</div>
@@ -73,7 +73,7 @@
     </div>
   </div>
   <div class="pad midi" data-midi="69">
-    <div class="pad-label">G</div>
+    <div class="pad-label">C#m</div>
     <div class="subpads">
       <div class="corner top-right" id="crn6"></div>
       <div class="subpad arrow">↓</div>
@@ -82,32 +82,43 @@
       <div class="subpad" id="pad6-b">b</div>
     </div>
   </div>
-  <div class="pad midi" data-midi="71">
-    <div class="pad-label">Am</div>
-    <div class="subpads">
-      <div class="corner top-right" id="crn7"></div>
-      <div class="subpad arrow">↓</div>
-      <div class="subpad arrow">↑</div>
-      <div class="subpad" id="pad7-B">B</div>
-      <div class="subpad" id="pad7-b">b</div>
+  <div class="pad midi" data-drum="drum">
+    <div class="pad-label">Drm</div>
+    <div class="pad-drum">
+      <div class="corner D kick" id="crnK">K</div>
+      <div class="corner D snare" id="crnS">MT</div>
+      <div class="corner D hiHat" id="crnhH">LT</div>
+      <div class="corner D hTom" id="crnhT">HT</div>
+      <div class="corner D mTom" id="crnmT">S</div>
+      <div class="corner D lTom" id="crnlT">HH</div>
+      <div class="corner D pSplash" id="crnpS">C</div>
+      <div class="corner D pCrash" id="crnpC">R</div>
     </div>
   </div>
 
   <!-- Pad VIII batería -->
-  <div class="pad drum" data-drum="kick">
-    <div class="pad-label">Drum</div>
-    <div class="subpads">
-      <div class="subpad">sS</div>
-      <div class="subpad">H</div>
-      <div class="subpad">K</div>
-      <div class="subpad">S</div>
-    </div>
+  <div class="pad drum">
+    <div class="pad-label"></div>
+    <div class="subpads"></div>
   </div>
+  
   <select id="midiSelect"></select>
+  <div class="opciones" id="tonalidad">
+    <select id="tonoSelect"></select>
+    <form id="estructura">
+      <label>
+        <input type="radio" name="estr" value="mayor" checked>mayor
+      </label>
+      <label>
+        <input type="radio" name="estr" value="menor">menor
+      </label>
+    </form>
+  </div>
 
   <script src="js/midi.js"></script>
   <script src="js/pisadasMap.js"></script>
   <script src="js/playNotes.js"></script>
   <script src="js/ajustes.js"></script>
+  <script src="js/tonalidad.js"></script>
 </body>
 </html>

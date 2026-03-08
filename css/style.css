@@ -74,7 +74,7 @@ body {
   left: 50%;      /* fuera del área de trabajo */
   display: block;    /* siempre está en el DOM */
 }
-    #volumenes {
+    .opciones {
           position: fixed;
           top: 0;
           left: 0;
@@ -98,7 +98,7 @@ body {
 .corner {
   position: absolute;
   width: 90px;
-  height: 40px;
+  height: 45px;
   background: black;
   cursor: pointer;
   z-index: 100;
@@ -120,8 +120,71 @@ body {
   top: 0;
   right: 50%;
    transform: translateX(50%);   
-  border-radius: 0 0 40px 40px;
+  border-radius: 0 0 45px 45px;
 }
 .corner.active{
       background: #ff5722;
+}
+.corner.D.kick{
+      width: 200px;
+      height: 100px;
+  bottom: 0;
+  right: 0%;
+   transform: translateX(50%);   
+  border-radius: 100px 100px 0 0;
+}
+.corner.D{
+      display: flex;
+      color: white;
+      font-size: 25px;
+      width: 116px;
+      height: 116px;
+     transform: translateX(50%);  
+justify-content: center;
+align-items: center;      
+  /*border-radius: 100px 100px 100px 100px;*/
+}
+.D.hiHat{
+      width: 130px;
+      height: 65px;
+      bottom: 0%;
+  right: 70%;
+      border-radius: 65px 65px 0px 0px;
+}
+.snare{
+      top: 0;
+  right: 49%;
+      border-radius: 100px 100px 100px 100px;
+}
+.D.hTom{
+      height: 58px;
+      top: 0;
+  right: 0%;
+      border-radius: 0px 0px 120px 120px;
+}
+.mTom{
+            top: 0;
+  right: -49%;
+border-radius: 100px 100px 100px 100px;
+}
+.D.lTom{
+      width: 130px;
+      height: 65px;
+      bottom: 0%;
+  right: -68%;
+border-radius: 65px 65px 0px 0px;
+}
+.D.pSplash{
+      width: 60px;
+      height: 60px;
+      top: 0%;
+  left: 155%;
+border-radius: 0px 0px 0px 60px;
+}
+.D.pCrash{
+      width: 60px;
+      height: 60px;
+      top: 0%;
+  right: 175px;
+border-radius: 0px 0px 60px 0px;
 }

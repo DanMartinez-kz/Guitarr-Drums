@@ -1,4 +1,3 @@
-const natAm = ["A", "B", "C", "D", "E", "F", "G"];
 const afiEst = [40, 45, 50, 55, 59, 64];
 
 const pisadasMap = {

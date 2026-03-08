@@ -1,13 +1,9 @@
 let clickCount = 0;
 let clickTimer = null;
 
-document.querySelectorAll('.corner').forEach(subpad => {
+document.querySelectorAll('.corner.top-right').forEach(subpad => {
   subpad.addEventListener('pointerdown', e => {
     
-    //const symbol = subpad.textContent.trim();
- console.log(subpad.id);   
-    //Casos-Ajustes
-//if (symbol === "b")  {
   clickCount++;
 
   if (clickTimer) clearTimeout(clickTimer);
@@ -33,7 +29,16 @@ document.querySelectorAll('.corner').forEach(subpad => {
     select.focus();
   }
   break;
-      case "crn7":
+      case "crn5":
+      const tonosDiv = document.getElementById("tonalidad");
+
+          if (tonosDiv.style.display === "none") {
+        tonosDiv.style.display = "block"; // mostrar
+      } else {
+        tonosDiv.style.display = "none"; // ocultar
+      }
+      break;
+      case "crn6":
       const slidersDiv = document.getElementById("volumenes");
 
           if (slidersDiv.style.display === "none") {
@@ -41,7 +46,6 @@ document.querySelectorAll('.corner').forEach(subpad => {
       } else {
         slidersDiv.style.display = "none"; // ocultar
       }
-
     }
  // }
 }

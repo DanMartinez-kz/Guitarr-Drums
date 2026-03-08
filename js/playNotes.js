@@ -18,9 +18,14 @@ const chordMap = {
 // Mapeo de batería (canal 10)
 const drumMap = {
   "K": 36,
-  "H": 42,
+  "HH": 42,
   "sS": 37,
-  "S": 38
+  "S": 38,
+  "HT": 50,
+  "MT": 48,
+  "LT": 41,
+  "R": 51,
+  "C": 49,
 };
 
 // Función auxiliar para calcular velocity según posición
@@ -88,7 +93,7 @@ function strumUp(notes) {
 }
 
 function playRoot(notes) {
-  const root = notes[0]-12;
+  const root = notes[0];
   midiOutput.send([0x98, root, 0x7f]); // canal 9
   activeAuxNotes.push(root);
 }
@@ -194,21 +199,21 @@ document.querySelectorAll('.subpad').forEach(subpad => {
     
     const parentPad = subpad.closest('.pad');
     const chordLabel = parentPad.querySelector('.pad-label')?.textContent.trim();
-    const drum = parentPad.dataset.drum;
     const symbol = subpad.textContent.trim();
-    console.log(symbol);
-    // Solo flechas apagan acordes previos
+    
+        // Solo flechas apagan acordes previos
     if (symbol === "↓" || symbol === "↑") {
       stopActiveChord();
       chordAct = chordLabel;
-      console.log("Act:", chordAct, "Ant:", chordAnt);
       const notes = chordToMidi(chordLabel);
       if (chordAct!=chordAnt){
         midiOutput.send([0x90, 36, 80]);
         midiOutput.send([0xB8, 11, 127]);
+        midiOutput.send([0xB8, 123, 127]);
         playRoot(notes);
-        console.log(notes);
-    //    midiOutput.send([0x98, 60, 127]);
+       // midiOutput.send([0xB8, 64, 127]);
+    //    midiOutput.send([0xB8, 123, 127]);
+        //    midiOutput.send([0x98, 60, 127]);
         chordAnt=chordAct;
       };
     };
@@ -221,11 +226,6 @@ document.querySelectorAll('.subpad').forEach(subpad => {
       if (symbol === "↑") { activeChordNotes = notes; strumUp(notes); }
       if (symbol === "B") playRoot(notes);
       if (symbol === "b") playFifth(notes);
-    }
-
-    if (drum && midiOutput) {
-      const note = drumMap[symbol];
-      if (note) midiOutput.send([0x99, note, 0x7f]); // canal 10
     }
     
     // Actualizamos el contador en tiempo real
@@ -241,14 +241,12 @@ document.querySelectorAll('.subpad').forEach(subpad => {
     intervalId = null;
 
     pressTime = performance.now() - pressStart;
-    console.log(pressTime);
     pressStart = null;
     
     const symbol = subpad.textContent.trim();
     const parentPad = subpad.closest('.pad');
     const chordLabel = parentPad.querySelector('.pad-label')?.textContent.trim();
-    const drum = parentPad.dataset.drum;
-
+    
     // Flechas: fade out
     if ((symbol === "↓" || symbol === "↑") && activeChordNotes.length > 0) {
     if (pressTime > 0) {
@@ -270,11 +268,7 @@ document.querySelectorAll('.subpad').forEach(subpad => {
     
    // chordAnt = chordLabel;
 
-    // Batería: apagado inmediato
-    if (drum && midiOutput) {
-      const note = drumMap[symbol];
-      if (note) midiOutput.send([0x89, note, 0x40]); // canal 10
-    }
+ 
   });
 
   subpad.addEventListener('pointercancel', () => {
@@ -288,21 +282,40 @@ document.querySelectorAll('.subpad').forEach(subpad => {
   subpad.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
 });
 
-const audio = document.getElementById("palmMute");
   // Añadimos el evento pointerdown a los semicírculos
-  const corners = document.querySelectorAll(".corner");
-corners.forEach(corner =>{    
+const corners = document.querySelectorAll(".corner");
+corners.forEach(corner =>{
   corner.addEventListener('contextmenu', e => e.preventDefault());
-corner.addEventListener("pointerdown", (event) => {
+  corner.addEventListener("pointerdown", (event) => {
   corner.classList.add('active');
-      console.log("Semicírculo clicado:", corner.className);
+    
+    const symbol = corner.textContent.trim();const parentPad = corner.closest('.pad');
+    const drum = parentPad.dataset.drum;
+        
+    if (drum && midiOutput) {
+      const note = drumMap[symbol];
+      if (note) midiOutput.send([0x99, note, 0x7f]); // canal 10
+    } else{
       stopActiveChord();
-      midiOutput.send([0xB0, 11, 0]);
-     // midiOutput.send([0x91, 39, 80]);
-     // audio.currentTime = 0;
-      //audio.play(); // reproducir con Web Audio API
-    });
+    midiOutput.send([0xB0, 11, 0]);
+    // midiOutput.send([0x91, 39, 80]);
+    // audio.currentTime = 0;
+    };
+  });
   corner.addEventListener("pointerup", e => {
     corner.classList.remove('active');
+    const symbol = corner.textContent.trim();const parentPad = corner.closest('.pad');
+    const drum = parentPad.dataset.drum;
+
+       // Batería: apagado inmediato
+    if (drum && midiOutput) {
+      const note = drumMap[symbol];
+      if (note) midiOutput.send([0x89, note, 0x40]); // canal 10
+    }
   })
+  corner.addEventListener('pointercancel', () => {
+    corner.classList.remove('active');
+  });
 });
+
+    

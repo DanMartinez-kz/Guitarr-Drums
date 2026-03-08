@@ -70,11 +70,11 @@ function stopSustain() {
 
 // Rasgueo hacia abajo con sustain
 function strumDown(notes) {
-  stopSustain();
+    stopSustain();
     midiOutput.send([0xB0, 64, 127]);
     notes.forEach((note, i) => {
-    const velocity = velocityByIndex(i, notes.length); // tu función de velocity
-    setTimeout(() => {
+      velocity = velocityByIndex(i, notes.length); // tu función de velocity
+      setTimeout(() => {
       midiOutput.send([0x90, note, velocity]);
     }, i * 10);
   });
@@ -214,13 +214,9 @@ document.querySelectorAll('.subpad').forEach(subpad => {
       chordAct = chordLabel;
       const notes = chordToMidi(chordLabel);
       if (chordAct!=chordAnt){
-        midiOutput.send([0x90, 36, 80]);
+        midiOutput.send([0x91, 36, 100]);
         midiOutput.send([0xB8, 11, 127]);
         midiOutput.send([0xB8, 123, 127]);
-       // playRoot(notes);
-       // midiOutput.send([0xB8, 64, 127]);
-    //    midiOutput.send([0xB8, 123, 127]);
-        //    midiOutput.send([0x98, 60, 127]);
         chordAnt=chordAct;
       };
     };
@@ -300,28 +296,16 @@ corners.forEach(corner =>{
     event.preventDefault();
   corner.classList.add('active');
     
-    const symbol = corner.textContent.trim();const parentPad = corner.closest('.pad');
-            
-    if (drum && midiOutput) {
-      const note = drumMap[symbol];
-      if (note) midiOutput.send([0x99, note, 0x7f]); // canal 10
-    } else{
-      stopActiveChord();
+   const symbol = corner.textContent.trim();const parentPad = corner.closest('.pad');
+    const chordLabel = parentPad.querySelector('.pad-label')?.textContent.trim();
+
+    stopActiveChord();
+    const notes = chordToMidi(chordLabel);
     midiOutput.send([0xB0, 11, 0]);
-    // midiOutput.send([0x91, 39, 80]);
-    // audio.currentTime = 0;
-    };
+    //midiOutput.send([0x91, 39, 80]);
   });
   corner.addEventListener("pointerup", e => {
     corner.classList.remove('active');
-    const symbol = corner.textContent.trim();const parentPad = corner.closest('.pad');
-    const drum = parentPad.dataset.drum;
-
-       // Batería: apagado inmediato
-    if (drum && midiOutput) {
-      const note = drumMap[symbol];
-      if (note) midiOutput.send([0x89, note, 0x40]); // canal 10
-    }
   })
   corner.addEventListener('pointercancel', () => {
     corner.classList.remove('active');

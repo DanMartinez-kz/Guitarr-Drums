@@ -1,11 +1,11 @@
 const notAm = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"];
 const estructura = {
-    mayor: ["", "", "", "m", "m", "m"],
-    menor: ["m", "7", "", "", "m", ""]
+    mayor: ["m", "m", "", "m", "", ""],
+    menor: ["", "m", "", "", "m", ""]
 };
 const intervalos = {
-  mayor: [0, 7, 5, 2, 4, 9],
-  menor: [0, 7, 8, 10, 5, 3]
+  mayor: [9, 4, 5, 2, 0, 7],
+  menor: [3, 5, 10, 8, 0, 7]
 };
 
 const select = document.getElementById("tonoSelect");

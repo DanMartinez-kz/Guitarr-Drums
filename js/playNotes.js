@@ -210,7 +210,7 @@ document.querySelectorAll('.subpad').forEach(subpad => {
         midiOutput.send([0x90, 36, 80]);
         midiOutput.send([0xB8, 11, 127]);
         midiOutput.send([0xB8, 123, 127]);
-        playRoot(notes);
+       // playRoot(notes);
        // midiOutput.send([0xB8, 64, 127]);
     //    midiOutput.send([0xB8, 123, 127]);
         //    midiOutput.send([0x98, 60, 127]);
@@ -285,8 +285,10 @@ document.querySelectorAll('.subpad').forEach(subpad => {
   // Añadimos el evento pointerdown a los semicírculos
 const corners = document.querySelectorAll(".corner");
 corners.forEach(corner =>{
+  corner.style.userSelect = "none";
   corner.addEventListener('contextmenu', e => e.preventDefault());
   corner.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
   corner.classList.add('active');
     
     const symbol = corner.textContent.trim();const parentPad = corner.closest('.pad');

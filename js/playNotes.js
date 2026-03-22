@@ -214,7 +214,7 @@ document.querySelectorAll('.subpad').forEach(subpad => {
       chordAct = chordLabel;
       const notes = chordToMidi(chordLabel);
       if (chordAct!=chordAnt){
-        midiOutput.send([0x91, 36, 100]);
+        midiOutput.send([0x91, 36, 70]);
         midiOutput.send([0xB8, 11, 127]);
         midiOutput.send([0xB8, 123, 127]);
         chordAnt=chordAct;
